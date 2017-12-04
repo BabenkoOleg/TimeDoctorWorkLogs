@@ -1,0 +1,6 @@
+timedoctor:
+  access_token: 'value'
+google:
+  spreadsheet_id: 'value'
+  sheet_title: 'Sheet1'
+  start_date: '2017-01-01'
