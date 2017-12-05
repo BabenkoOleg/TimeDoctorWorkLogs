@@ -44,9 +44,10 @@ module Worklogs
 
       names = worklog['worklogs']['items'].map { |w| w['user_name'] }.uniq
       names.each do |name|
-        data[:lengths][name.strip] =
-          worklog['worklogs']['items'].select { |w| w['user_name'] == name }
-                                      .sum { |w| w['length'].to_i }
+        lengths = worklog['worklogs']['items'].select { |w| w['user_name'] == name }
+                                              .sum { |w| w['length'].to_i }
+
+        data[:lengths][name.strip] = Time.at(lengths).utc.strftime("%H:%M:%S")
       end
 
       data
