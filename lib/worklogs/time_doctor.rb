@@ -1,28 +1,55 @@
 module Worklogs
   class TimeDoctor
-    attr_accessor :access_token, :company_id
-
     API_URL = 'https://webapi.timedoctor.com/v1.1'.freeze
 
-    def initialize(access_token, company_id)
-      @access_token = access_token
-      @company_id = company_id
+    attr_accessor :config
+
+    def initialize(config)
+      @config = config
     end
 
-    def get_worklogs(from, to)
-      uri = URI("#{API_URL}/companies/#{company_id}/worklogs")
+    def get_worklogs
+      worklogs = {}
+      (config.from..config.to).uniq.map do |date|
+        worklog = get_worklogs_for_day(date.strftime('%Y-%m-%d'))
+        worklogs[worklog[:date]] = worklog[:lengths]
+      end
+      worklogs
+    end
+
+    private
+
+    def get_worklogs_for_day(day)
+      uri = URI("#{API_URL}/companies/#{config.company_id}/worklogs")
       params = {
-        access_token: access_token,
+        access_token: config.access_token,
         consolidated: 0,
-        start_date: from,
-        end_date: to,
+        start_date: day,
+        end_date: day,
         _format: 'json'
       }
-      uri.query = URI.encode_www_form(params)
-      response = Net::HTTP.get_response(uri)
 
-      response.code == '200' ? JSON.parse(response.body)
-                             : raise "#{response.code}: #{response.message}"
+      uri.query = URI.encode_www_form(params)
+      puts "-- get worklogs for: #{day}"
+
+      response = Net::HTTP.get_response(uri)
+      raise "#{response.code}: #{response.message}" if response.code != '200'
+
+      parse_worklog(JSON.parse(response.body))
+    end
+
+    def parse_worklog(worklog)
+      data = { date: worklog['start_time'][/\d+-\d+-\d+/], lengths: {} }
+      return data unless worklog['worklogs']['items'].any?
+
+      names = worklog['worklogs']['items'].map { |w| w['user_name'] }.uniq
+      names.each do |name|
+        data[:lengths][name.strip] =
+          worklog['worklogs']['items'].select { |w| w['user_name'] == name }
+                                      .sum { |w| w['length'].to_i }
+      end
+
+      data
     end
   end
 end

@@ -1,5 +1,6 @@
 timedoctor:
   access_token: 'value'
+  company_id: 000000
 google:
   spreadsheet_id: 'value'
   sheet_title: 'Sheet1'
