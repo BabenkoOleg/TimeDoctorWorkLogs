@@ -25,8 +25,8 @@ module Worklogs
 
     def add_row_to_sheet(row)
       top_row = DateTime.parse(row.first).mjd - start_date.mjd + 2
-      values = [row.first, ];
-      existing_names.each { |name| values << row.last[name] }
+      return if top_row < 1
+      values = [row.first, existing_names.map { |name| row.last[name] }].flatten
       sheet.update_cells(top_row, 1, [values])
     end
 
