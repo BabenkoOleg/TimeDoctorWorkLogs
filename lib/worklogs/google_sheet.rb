@@ -12,6 +12,7 @@ module Worklogs
     def update(rows)
       names = rows.values.map(&:keys).flatten.uniq
       check_names(names)
+      sheet.reload
       rows.each { |row| add_row_to_sheet(row) }
       sheet.save
     end
@@ -35,7 +36,7 @@ module Worklogs
     end
 
     def existing_names
-      @existing_names ||= sheet.rows[0][1..-1]
+      sheet.rows[0][1..-1]
     end
   end
 end
