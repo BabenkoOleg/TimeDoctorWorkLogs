@@ -6,8 +6,8 @@ module Worklogs
       @timedoctor = OpenStruct.new(
         access_token: config_file['timedoctor']['access_token'],
         company_id: config_file['timedoctor']['company_id'],
-        from: Date.today - 1,
-        to: Date.today - 1
+        from: Date.today,
+        to: Date.today
       )
       @google_sheet = OpenStruct.new(
         spreadsheet_id: config_file['google']['spreadsheet_id'],
